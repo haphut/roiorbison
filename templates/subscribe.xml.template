@@ -1,0 +1,34 @@
+<SubscriptionRequest
+    MessageId="${message_id}"
+    >
+    <VehicleJourneyEventSelection
+        LookAheadDuration="${look_ahead_duration}"
+        ExpandStopData="N"
+        ExpandDestinationData="N"
+        ExpandVehicleData="N"
+        ExpandLineData="Y"
+        ExpandVehicleOperatorData="Y"
+        ExpandServiceRequirementData="N"
+        ExpandDeviationMessageData="N"
+        ExcludeIntermediateStateChanges="N"
+        >
+        <ScopeElements>
+            <ScopeElement ConcernsArrivals="Y" ConcernsDepartures="Y"/>
+        </ScopeElements>
+    </VehicleJourneyEventSelection>
+    <DeviationCaseEventSelection
+        IncludeSourceControlAction="Y"
+        DeviationMessageVersionEventsOnly="N"
+        >
+        <ScopeElements>
+            <ScopeElement ConcernsArrivals="Y" ConcernsDepartures="Y"/>
+        </ScopeElements>
+        <PublicationScopeElements>
+            <PublicationScopeElement/>
+        </PublicationScopeElements>
+    </DeviationCaseEventSelection>
+    <AssignmentEventSelection/>
+    <NetworkDeviationEventSelection
+        ExpandDeviationMessageData="N"
+        />
+</SubscriptionRequest>

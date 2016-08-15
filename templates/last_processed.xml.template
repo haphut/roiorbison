@@ -1,0 +1,5 @@
+<LastProcessedMessageResponse
+      LastProcessedMessageId="${last_processed_message_id}"
+      OnMessageId="${on_message_id}"
+      MessageId="${message_id}"
+      />

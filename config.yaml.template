@@ -1,0 +1,42 @@
+roi:
+    host: 'roiserver.com'
+    port: 12345
+    reconnect_wait_in_seconds: 10
+    templates:
+        own_root_start_tag:
+            filename: 'templates/own_root_start_tag.xml.template'
+            mapping:
+                peer_id: 'MY_ROI_PEER_ID'
+                max_message_interval: 'PT30S'
+                document_layout_version: '3.0.7'
+        own_root_end_tag:
+            filename: 'templates/own_root_end_tag.xml.template'
+            mapping: {}
+        resume_subscription:
+            filename: 'templates/resume_subscription.xml.template'
+            mapping: {}
+        subscribe:
+            filename: 'templates/subscribe.xml.template'
+            mapping:
+                look_ahead_duration: 'PT19H'
+        last_processed:
+            filename: 'templates/last_processed.xml.template'
+            mapping: {}
+mqtt:
+    host: 'mqttbroker.com'
+    port: 8883
+logging:
+    version: 1
+    formatters:
+        utc:
+            (): 'log.UTCFormatter'
+            format: '%(asctime)s.%(msecs)03dZ %(name)s: %(levelname)s: %(message)s'
+            datefmt: '%Y-%m-%dT%H:%M:%S'
+    handlers:
+        console:
+            class: 'logging.StreamHandler'
+            formatter: 'utc'
+    root:
+        handlers:
+            - 'console'
+        level: 'DEBUG'

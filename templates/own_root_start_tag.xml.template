@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ROI:ToPubTransMessages
+    xmlns:ROI="http://www.pubtrans.com/ROI/3.0"
+    xmlns:PT="http://www.pubtrans.com/PT/1.0"
+    xmlns:xs="http://www.w3.org/2001/XML_Schema-instance"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    DocumentLayoutVersion="${document_layout_version}"
+    PeerId="${peer_id}"
+    MaxMessageInterval="${max_message_interval}"
+    >
