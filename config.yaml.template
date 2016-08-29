@@ -1,7 +1,7 @@
 roi:
     host: 'roiserver.com'
     port: 12345
-    reconnect_wait_in_seconds: 10
+    reconnect_interval: 'PT10S'
     templates:
         own_root_start_tag:
             filename: 'templates/own_root_start_tag.xml.template'

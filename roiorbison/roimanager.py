@@ -6,6 +6,8 @@ import functools
 import logging
 import threading
 
+import isodate
+
 from . import poisonpill
 from . import roimachine
 
@@ -55,6 +57,10 @@ async def _wait_for_event(run_blocking, event):
     await run_blocking(event.wait)
 
 
+def _duration_to_seconds(duration):
+    return isodate.parse_duration(duration).total_seconds()
+
+
 async def _empty_queue(queue):
     # FIXME: implement this, consider both queue types
     pass
@@ -68,7 +74,7 @@ async def run_roi_protocol(config, loop):
     roi_config = config['roi']
     roi_host = roi_config['host']
     roi_port = roi_config['port']
-    roi_reconnect_wait_in_seconds = roi_config['reconnect_wait_in_seconds']
+    reconnect_wait_in_seconds = _duration_to_seconds(roi_config['reconnect_interval'])
 
     executor = None
     run_blocking = functools.partial(_run_blocking_until_complete, loop, executor)
