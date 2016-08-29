@@ -6,10 +6,11 @@
 #
 automaton==1.4.0
 debtcollector==1.8.0      # via automaton
+isodate==0.5.4
 lxml==3.6.4
 paho-mqtt==1.2
 pbr==1.10.0               # via automaton, debtcollector
 PrettyTable==0.7.2        # via automaton
-PyYAML==3.11
+PyYAML==3.12
 six==1.10.0               # via automaton, debtcollector
 wrapt==1.10.8             # via debtcollector
