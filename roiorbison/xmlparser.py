@@ -25,7 +25,7 @@ class XMLParser:
 
         Arguments:
             input_queue: (asyncio.Queue) Queue to read ROI bytes from.
-            output_queue: (queue.Queue) Queue towards ROIManager.
+            output_queue: (queue.Queue) Queue towards ROIMachine.
             forward_queue: (asyncio.Queue) Queue towards MQTTForwarder.
             run_blocking: (coroutine) Awaitable wrapper for a blocking function.
         """

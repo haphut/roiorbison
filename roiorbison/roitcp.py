@@ -7,6 +7,7 @@ import logging
 import threading
 
 from . import poisonpill
+from . import roimachine
 
 
 LOG = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ async def run_roi_protocol(config, loop):
     forwarder = mqttforwarder.MQTTForwarder(config['mqtt'], xml_forward_queue, is_mqtt_connected, is_mqtt_disconnected)
     xml_parser = xmlparser.XMLParser(bytes_in_queue, xml_in_queue,
                                      xml_forward_queue, run_blocking)
-    roi_manager = roimanager.ROIManager(config['roi'], xml_in_queue, bytes_out_queue, run_blocking)
+    roi_manager = roimachine.ROIMachine(config['roi'], xml_in_queue, bytes_out_queue, run_blocking)
 
     while True:
         try:

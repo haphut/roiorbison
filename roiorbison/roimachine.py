@@ -14,11 +14,11 @@ import poisonpill
 LOG = logging.getLogger(__name__)
 
 
-class ROIManager:
+class ROIMachine:
     """Manage ROI protocol.
 
-    The same ROIManager object is meant to be used over several TCP connections.
-    ROIManager keeps track of whether it should attempt to resume an existing
+    The same ROIMachine object is meant to be used over several TCP connections.
+    ROIMachine keeps track of whether it should attempt to resume an existing
     subscription or create a new subscription.
     """
     # Expected element names from the server in one place.
@@ -126,7 +126,7 @@ class ROIManager:
         self._machine = self._create_machine()
 
     # The functions named _react_in_* are reactions triggered by state machine
-    # transitions. In ROIManager, each such reaction corresponds with exactly
+    # transitions. In ROIMachine, each such reaction corresponds with exactly
     # one state. They contain the code that should be run when in the new state.
 
     def _react_in_own_root_tag(self, unused_old_state, unused_new_state, unused_event):
@@ -138,7 +138,7 @@ class ROIManager:
         if received is poisonpill.PoisonPill:
             LOG.debug('Received PoisonPill.')
             return 'got_poison_pill'
-        if received.tag == ROIManager._ROOT_NAME:
+        if received.tag == ROIMachine._ROOT_NAME:
             LOG.debug('Received: ' + received)
             return 'got_remote_root_start_tag'
         else:
@@ -167,14 +167,14 @@ class ROIManager:
             LOG.debug('Received PoisonPill.')
             return 'got_poison_pill'
         tag = received.tag
-        if tag == ROIManager._SUBSCRIPTION_RESUME_RESPONSE_NAME:
+        if tag == ROIMachine._SUBSCRIPTION_RESUME_RESPONSE_NAME:
             LOG.info('Received: ' + received)
             return 'got_resuming_ok'
-        if tag == ROIManager._LAST_PROCESSED_NAME:
+        if tag == ROIMachine._LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
             LOG.debug('Received: ' + received)
             return 'got_last_processed_request'
-        if tag == ROIManager._SUBSCRIPTION_ERROR_REPORT_NAME:
+        if tag == ROIMachine._SUBSCRIPTION_ERROR_REPORT_NAME:
             LOG.warn('Received: ' + received)
             # "The SynchronisedUpToUtcDateTime is no longer in the production
             # plan's active interval. The Production Plan will be recovered from
@@ -184,7 +184,7 @@ class ROIManager:
             else:
                 self._should_resume = False
                 return 'got_resuming_failed'
-        if tag == ROIManager._SUBSCRIPTION_ERROR_RESPONSE_NAME:
+        if tag == ROIMachine._SUBSCRIPTION_ERROR_RESPONSE_NAME:
             LOG.warn('Received: ' + received)
             self._should_resume = False
             return 'got_resuming_failed'
@@ -197,15 +197,15 @@ class ROIManager:
             LOG.debug('Received PoisonPill.')
             return 'got_poison_pill'
         tag = received.tag
-        if tag == ROIManager._SUBSCRIPTION_RESPONSE_NAME:
+        if tag == ROIMachine._SUBSCRIPTION_RESPONSE_NAME:
             self._should_resume = True
             LOG.info('Received: ' + received)
             return 'got_subscribing_ok'
-        if tag == ROIManager._LAST_PROCESSED_NAME:
+        if tag == ROIMachine._LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
             LOG.debug('Received: ' + received)
             return 'got_last_processed_request'
-        if tag == ROIManager._SUBSCRIPTION_ERROR_REPORT_NAME or tag == ROIManager._SUBSCRIPTION_ERROR_RESPONSE_NAME:
+        if tag == ROIMachine._SUBSCRIPTION_ERROR_REPORT_NAME or tag == ROIMachine._SUBSCRIPTION_ERROR_RESPONSE_NAME:
             self._should_resume = True
             LOG.warn('Received: ' + received)
             return 'got_subscribing_failed'
@@ -227,11 +227,11 @@ class ROIManager:
             LOG.debug('Received PoisonPill.')
             return 'got_poison_pill'
         tag = received.tag
-        if tag == ROIManager._LAST_PROCESSED_NAME:
+        if tag == ROIMachine._LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
             LOG.debug('Received: ' + received)
             return 'got_last_processed_request'
-        if tag == ROIManager._REMOTE_ROOT_START_TAG_NAME:
+        if tag == ROIMachine._REMOTE_ROOT_START_TAG_NAME:
             LOG.warn('Received: ' + received)
             return 'got_remote_root_end_tag'
         LOG.debug('Received: ' + received)
@@ -242,7 +242,7 @@ class ROIManager:
         return 'sent_own_root_end_tag'
 
     def _create_machine(self):
-        m = machines.FiniteMachine.build(ROIManager._ROI_STATE_SPACE)
+        m = machines.FiniteMachine.build(ROIMachine._ROI_STATE_SPACE)
         m.default_start_state = 'ready_to_start'
         m.add_reaction('listening', 'sent_lp_response_return_listening', self._react_in_listening)
         m.add_reaction('resuming_response', 'sent_lp_response_return_resuming', self._react_in_resuming_response)
@@ -279,4 +279,4 @@ if __name__ == "__main__":
     input_queue = MagicMock()
     output_queue = MagicMock()
     logging.basicConfig(level=logging.DEBUG)
-    r = ROIManager(config, input_queue, output_queue, print)
+    r = ROIMachine(config, input_queue, output_queue, print)
