@@ -10,6 +10,7 @@ import isodate
 
 from . import poisonpill
 from . import roimachine
+from . import timeutil
 
 
 LOG = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ async def run_roi_protocol(config, loop):
     roi_config = config['roi']
     roi_host = roi_config['host']
     roi_port = roi_config['port']
-    reconnect_wait_in_seconds = _duration_to_seconds(roi_config['reconnect_interval'])
+    reconnect_wait_in_seconds = timeutil.convert_duration_to_seconds(roi_config['reconnect_interval'])
 
     executor = None
     run_blocking = functools.partial(_run_blocking_until_complete, loop, executor)
