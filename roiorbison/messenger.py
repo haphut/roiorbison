@@ -3,7 +3,7 @@
 
 import logging
 
-import templater
+from . import templater
 
 LOG = logging.getLogger(__name__)
 
