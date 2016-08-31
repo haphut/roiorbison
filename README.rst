@@ -69,9 +69,7 @@ Upgrade dependencies:
 
 .. code-block:: sh
 
-  for f in requirements/*.in; do
-      pip-compile --upgrade "${f}"
-  done
+  ./upgrade_dependencies.sh
   pip-sync requirements/dev.txt
 
 
