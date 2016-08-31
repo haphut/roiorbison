@@ -25,6 +25,8 @@ roi:
 mqtt:
     host: 'mqttbroker.com'
     port: 8883
+    topic: 'roiorbison'
+    qos: 2
     retained_message_wait_duration: 'PT10S'
 logging:
     version: 1
