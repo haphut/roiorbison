@@ -1,30 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Main module."""
 
 import asyncio
 import logging
 import logging.config
+import threading
 
-import cmdline
-import log
+from . import cmdline
+from . import mqttforwarder
+from . import roimanager
+from . import util
 
 
 def main():
-    # Format logging from a file.
-    # Create event loop
-    # Create queues?
-    # Start MQTT connection
-    # When mqtt subscription and retain check is finished,
-    # Start ROI TCP connection while True -loop
+    """Main function."""
     args = cmdline.parse_cmdline()
     config = args.config
 
-    log.set_logging(config['logging'])
-    LOG = logging.getLogger(__name__)
+    logging.config.dictConfig(config['logging'])
+    logger = logging.getLogger(__name__)
 
     loop = asyncio.get_event_loop()
+    async_helper = util.AsyncHelper(loop, executor=None)
 
-    #mqtt_forwarder = MQTTForwarder(config['mqtt'])
+    xml_forward_queue = asyncio.Queue()
+
+    # Create separate events for getting connected and disconnected so both can
+    # be waited for normally. Not very pretty.
+    is_mqtt_connected = threading.Event()
+    is_mqtt_disconnected = threading.Event()
+    is_mqtt_disconnected.set()
+
+    mqtt_forwarder = mqttforwarder.MQTTForwarder(
+        config['mqtt'], async_helper, xml_forward_queue, is_mqtt_connected,
+        is_mqtt_disconnected)
+
+    futures = [
+        mqtt_forwarder.run(),
+        roimanager.run_roi(config['roi'], async_helper, xml_forward_queue,
+                           is_mqtt_connected, is_mqtt_disconnected),
+    ]
+    loop.run_until_complete(
+        async_helper.wait_until_first_done(futures, logger))
 
 
 if __name__ == "__main__":
