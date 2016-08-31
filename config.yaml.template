@@ -30,7 +30,7 @@ logging:
     version: 1
     formatters:
         utc:
-            (): 'log.UTCFormatter'
+            (): 'utcformatter.UTCFormatter'
             format: '%(asctime)s.%(msecs)03dZ %(name)s: %(levelname)s: %(message)s'
             datefmt: '%Y-%m-%dT%H:%M:%S'
     handlers:
