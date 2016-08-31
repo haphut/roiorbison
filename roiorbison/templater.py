@@ -30,8 +30,8 @@ class Templater:
         if extra_mapping is None:
             extra_mapping = {}
         # Generate a message_id regardless whether the Template requires it.
-        # This can leave holes in the sent message_id ranges. As only uniqueness
-        # is required, that is okay.
+        # This can leave holes in the sent message_id ranges. As only
+        # uniqueness is required, that is okay.
         message_id_mapping = {'message_id': next(self._generator)}
         merged_mapping = {
             **self._mapping,

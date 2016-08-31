@@ -19,7 +19,8 @@ def _create_message_id_generator(start=0):
 class Messenger:
     """Form own ROI messages and queue them to be sent to the ROI server.
 
-    Messenger and its output queue can live for the duration of the application.
+    Messenger and its output queue can live for the duration of the
+    application.
     """
 
     def __init__(self, config, output_queue):
