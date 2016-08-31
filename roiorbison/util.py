@@ -45,3 +45,7 @@ class AsyncHelper:
     async def wait_for_event(self, event, *args, **kwargs):
         """Use threading.Event.wait() with asyncio."""
         return await self.run_in_executor(event.wait, *args, **kwargs)
+
+    async def wait_forever(self, future):
+        """Wait for a future until it is done."""
+        return await asyncio.wait_for(future, timeout=None, loop=self._loop)
