@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Parse bytes to XML elements."""
+"""Parse bytes into XML elements."""
 
 import logging
 import copy
@@ -23,21 +23,19 @@ def _trim_tree(element):
 class XMLParser:
     """Parse bytes into XML elements."""
 
-    def __init__(self, input_queue, output_queue, forward_queue,
-                 run_in_thread):
+    def __init__(self, async_helper, input_queue, output_queue, forward_queue):
         """Create XMLParser.
 
         Arguments:
+            async_helper: (util.AsyncHelper) asyncio helper object.
             input_queue: (asyncio.Queue) Queue to read ROI bytes from.
             output_queue: (queue.Queue) Queue towards ROIMachine.
             forward_queue: (asyncio.Queue) Queue towards MQTTForwarder.
-            run_in_thread: (coroutine) Awaitable wrapper for blocking
-                functions.
         """
+        self._async_helper = async_helper
         self._input_queue = input_queue
         self._output_queue = output_queue
         self._forward_queue = forward_queue
-        self._run_in_thread = run_in_thread
 
     async def _copy_into_queues(self, element):
         """Copy an Element into a blocking queue.
@@ -45,7 +43,7 @@ class XMLParser:
         We wish to reduce the memory used by the ElementTree by trimming the
         tree so send independent copies of elements onwards.
         """
-        await self._run_in_thread(
+        await self._async_helper.run_in_executor(
             functools.partial(self._output_queue.put, copy.deepcopy(element)))
         await self._forward_queue.put(copy.deepcopy(element))
 
