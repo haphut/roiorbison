@@ -96,4 +96,4 @@ class XMLParser:
                     return
                 parser.feed(received)
         except etree.LxmlError as e:
-            LOG.warn(e)
+            LOG.warning('Error parsing stream from the ROI server: ' + str(e))
