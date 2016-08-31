@@ -35,12 +35,11 @@ def main():
     mqtt_forwarder = mqttforwarder.MQTTForwarder(
         config['mqtt'], async_helper, xml_forward_queue, is_mqtt_connected,
         is_mqtt_disconnected)
+    roi_manager = roimanager.ROIManager(config['roi'], async_helper,
+                                        xml_forward_queue, is_mqtt_connected,
+                                        is_mqtt_disconnected)
 
-    futures = [
-        mqtt_forwarder.run(),
-        roimanager.run_roi(config['roi'], async_helper, xml_forward_queue,
-                           is_mqtt_connected, is_mqtt_disconnected),
-    ]
+    futures = [mqtt_forwarder.run(), roi_manager.run()]
     loop.run_until_complete(
         async_helper.wait_until_first_done(futures, logger))
 

@@ -2,6 +2,7 @@
 """Control all of ROI handling."""
 
 import asyncio
+import functools
 import logging
 import queue
 
@@ -11,9 +12,6 @@ from . import util
 from . import xmlparser
 
 LOG = logging.getLogger(__name__)
-
-# Size for TCP StreamReader buffer.
-CONNECTION_READING_BUFFER = 2**16
 
 
 async def _keep_reading(reader, bytes_in_queue):
@@ -60,70 +58,106 @@ async def _empty_queue(queue_):
         queue_.get()
 
 
-async def run_roi(config, async_helper, xml_forward_queue, is_mqtt_connected,
-                  is_mqtt_disconnected):
-    """Run ROI protocol and ROI message forwarding."""
-    host = config['host']
-    port = config['port']
-    reconnect_wait_in_seconds = util.convert_duration_to_seconds(config[
-        'reconnect_interval'])
+class ROIManager:
+    """Manage ROI protocol and ROI message forwarding."""
 
-    bytes_in_queue = asyncio.Queue()
-    xml_in_queue = queue.Queue()
-    bytes_out_queue = queue.Queue()
+    # Size of StreamReader buffer.
+    _CONNECTION_READING_BUFFER = 2**16
 
-    xml_parser = xmlparser.XMLParser(async_helper, bytes_in_queue,
-                                     xml_in_queue, xml_forward_queue)
-    roi_machine = roimachine.ROIMachine(config, async_helper, xml_in_queue,
-                                        bytes_out_queue)
+    def __init__(self, config, async_helper, xml_forward_queue,
+                 is_mqtt_connected, is_mqtt_disconnected):
+        self._async_helper = async_helper
+        self._xml_forward_queue = xml_forward_queue
+        self._is_mqtt_connected = is_mqtt_connected
+        self._is_mqtt_disconnected = is_mqtt_disconnected
 
-    while True:
-        try:
-            await async_helper.wait_for_event(is_mqtt_connected)
-            reader, writer = await asyncio.open_connection(
-                host,
-                port,
-                loop=async_helper.loop,
-                limit=CONNECTION_READING_BUFFER)
+        self._host = config['host']
+        self._port = config['port']
+        self._reconnect_wait_in_seconds = util.convert_duration_to_seconds(
+            config['reconnect_interval'])
 
-            mqtt_disconnected_fut = async_helper.wait_for_event(
-                is_mqtt_disconnected)
-            parsing_fut = xml_parser.keep_parsing()
-            reading_fut = _keep_reading(reader, bytes_in_queue)
-            writing_fut = _keep_writing(async_helper, writer, bytes_out_queue)
-            roi_machine_fut = roi_machine.run()
-            futures = [
-                mqtt_disconnected_fut,
-                parsing_fut,
-                reading_fut,
-                writing_fut,
-                roi_machine_fut,
-            ]
-            # As long as everything works as expected, none of the futures
-            # should get done.
-            await async_helper.wait_until_first_done(futures, LOG)
+        self._bytes_in_queue = asyncio.Queue()
+        self._xml_in_queue = queue.Queue()
+        self._bytes_out_queue = queue.Queue()
 
-        except OSError as ex:
-            LOG.warning('ROI connection problem: ' + ex)
+        self._xml_parser = xmlparser.XMLParser(
+            self._async_helper, self._bytes_in_queue, self._xml_in_queue,
+            self._xml_forward_queue)
+        self._roi_machine = roimachine.ROIMachine(config, self._async_helper,
+                                                  self._xml_in_queue,
+                                                  self._bytes_out_queue)
 
+        self._reader = None
+        self._writer = None
+        self._mqtt_disconnects_fut = None
+        self._parsing_fut = None
+        self._reading_fut = None
+        self._writing_fut = None
+        self._roi_machine_fut = None
+
+    async def _connect(self):
+        self._reader, self._writer = await asyncio.open_connection(
+            self._host,
+            self._port,
+            loop=self._async_helper.loop,
+            limit=ROIManager._CONNECTION_READING_BUFFER)
+
+    async def _set_futures_up(self):
+        self._mqtt_disconnects_fut = self._async_helper.wait_for_event(
+            self._is_mqtt_disconnected)
+        self._parsing_fut = self._xml_parser.keep_parsing()
+        self._reading_fut = _keep_reading(self._reader, self._bytes_in_queue)
+        self._writing_fut = _keep_writing(self._async_helper, self._writer,
+                                          self._bytes_out_queue)
+        self._roi_machine_fut = self._roi_machine.run()
+
+    async def _wait_until_problem(self):
+        futures = [
+            self._mqtt_disconnects_fut,
+            self._parsing_fut,
+            self._reading_fut,
+            self._writing_fut,
+            self._roi_machine_fut,
+        ]
+        # As long as everything works as expected, none of the futures
+        # should get done.
+        await self._async_helper.wait_until_first_done(futures, LOG)
+
+    async def _clean_up(self):
         # Clean up in order from the reading end to the writing end.
-        reading_fut.cancel()
-        await async_helper.wait_forever(reading_fut)
-        await bytes_in_queue.put(poisonpill.PoisonPill)
-        await async_helper.wait_forever(parsing_fut)
-        await xml_in_queue.put(poisonpill.PoisonPill)
-        await async_helper.wait_forever(roi_machine_fut)
-        await bytes_out_queue.put(poisonpill.PoisonPill)
-        await async_helper.wait_forever(writing_fut)
+        self._reading_fut.cancel()
+        await self._async_helper.wait_forever(self._reading_fut)
+        await self._bytes_in_queue.put(poisonpill.PoisonPill)
+        await self._async_helper.wait_forever(self._parsing_fut)
+        await self._async_helper.run_in_executor(
+            functools.partial(self._xml_in_queue.put, poisonpill.PoisonPill))
+        await self._async_helper.wait_forever(self._roi_machine_fut)
+        await self._async_helper.run_in_executor(
+            functools.partial(self._bytes_out_queue.put, poisonpill.PoisonPill)
+        )
+        await self._bytes_out_queue.put(poisonpill.PoisonPill)
+        await self._async_helper.wait_forever(self._writing_fut)
 
         # Empty the queues for reuse.
-        await _empty_asyncio_queue(bytes_in_queue)
-        await _empty_queue(xml_in_queue)
-        await _empty_queue(bytes_out_queue)
+        await _empty_asyncio_queue(self._bytes_in_queue)
+        await _empty_queue(self._xml_in_queue)
+        await _empty_queue(self._bytes_out_queue)
 
         # In CPython 3.5.2 close can be called several times consecutively.
-        writer.close()
+        self._writer.close()
 
-        LOG.info('Wait ' + reconnect_wait_in_seconds +
-                 ' seconds before reconnecting.')
-        await asyncio.sleep(reconnect_wait_in_seconds)
+    async def run(self):
+        """Run ROIManager."""
+        while True:
+            try:
+                await self._async_helper.wait_for_event(
+                    self._is_mqtt_connected)
+                await self._connect()
+                await self._set_futures_up()
+                await self._wait_until_problem()
+            except OSError as ex:
+                LOG.warning('ROI connection problem: ' + ex)
+            await self._clean_up()
+            LOG.info('Wait ' + self._reconnect_wait_in_seconds +
+                     ' seconds before reconnecting.')
+            await asyncio.sleep(self._reconnect_wait_in_seconds)
