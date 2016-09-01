@@ -31,12 +31,12 @@ async def _keep_reading(reader, bytes_in_queue):
 async def _keep_writing(async_helper, writer, bytes_out_queue):
     """Write the contents of the queue into the writer.
 
-    In case of an exception or the PoisonPill, log and return.
+    In case of an exception or the POISON_PILL, log and return.
     """
     while True:
         to_be_sent = await async_helper.run_in_executor(bytes_out_queue.get)
-        if to_be_sent is poisonpill.PoisonPill:
-            LOG.debug('Received PoisonPill.')
+        if to_be_sent is poisonpill.POISON_PILL:
+            LOG.debug('Received POISON_PILL.')
             return
         try:
             writer.write(to_be_sent)
@@ -127,15 +127,15 @@ class ROIManager:
         # Clean up in order from the reading end to the writing end.
         self._reading_fut.cancel()
         await self._async_helper.wait_forever(self._reading_fut)
-        await self._bytes_in_queue.put(poisonpill.PoisonPill)
+        await self._bytes_in_queue.put(poisonpill.POISON_PILL)
         await self._async_helper.wait_forever(self._parsing_fut)
         await self._async_helper.run_in_executor(
-            functools.partial(self._xml_in_queue.put, poisonpill.PoisonPill))
+            functools.partial(self._xml_in_queue.put, poisonpill.POISON_PILL))
         await self._async_helper.wait_forever(self._roi_machine_fut)
         await self._async_helper.run_in_executor(
-            functools.partial(self._bytes_out_queue.put, poisonpill.PoisonPill)
+            functools.partial(self._bytes_out_queue.put, poisonpill.POISON_PILL)
         )
-        await self._bytes_out_queue.put(poisonpill.PoisonPill)
+        await self._bytes_out_queue.put(poisonpill.POISON_PILL)
         await self._async_helper.wait_forever(self._writing_fut)
 
         # Empty the queues for reuse.

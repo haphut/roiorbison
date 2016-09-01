@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
+"""Singleton poison pill for use with FIFO queues."""
 
-# Singleton for use with different kinds of FIFO queues.
-PoisonPill = object()
+POISON_PILL = object()

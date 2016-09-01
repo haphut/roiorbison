@@ -140,8 +140,8 @@ class ROIMachine:
     def _react_in_remote_root_tag(self, dummy_old_state, dummy_new_state,
                                   dummy_event):
         received = self._input_queue.get()
-        if received is poisonpill.PoisonPill:
-            LOG.debug('Received PoisonPill.')
+        if received is poisonpill.POISON_PILL:
+            LOG.debug('Received POISON_PILL.')
             return 'got_poison_pill'
         if received.tag == ROI_ROOT_NAME:
             LOG.debug('Received: ' + received)
@@ -172,8 +172,8 @@ class ROIMachine:
     def _react_in_resuming_response(self, dummy_old_state, dummy_new_state,
                                     dummy_event):
         received = self._input_queue.get()
-        if received is poisonpill.PoisonPill:
-            LOG.debug('Received PoisonPill.')
+        if received is poisonpill.POISON_PILL:
+            LOG.debug('Received POISON_PILL.')
             return 'got_poison_pill'
         tag = received.tag
         if tag == ROI_SUBSCRIPTION_RESUME_RESPONSE_NAME:
@@ -203,8 +203,8 @@ class ROIMachine:
     def _react_in_subscribing_response(self, dummy_old_state, dummy_new_state,
                                        dummy_event):
         received = self._input_queue.get()
-        if received is poisonpill.PoisonPill:
-            LOG.debug('Received PoisonPill.')
+        if received is poisonpill.POISON_PILL:
+            LOG.debug('Received POISON_PILL.')
             return 'got_poison_pill'
         tag = received.tag
         if tag == ROI_SUBSCRIPTION_RESPONSE_NAME:
@@ -237,8 +237,8 @@ class ROIMachine:
     def _react_in_listening(self, dummy_old_state, dummy_new_state,
                             dummy_event):
         received = self._input_queue.get()
-        if received is poisonpill.PoisonPill:
-            LOG.debug('Received PoisonPill.')
+        if received is poisonpill.POISON_PILL:
+            LOG.debug('Received POISON_PILL.')
             return 'got_poison_pill'
         tag = received.tag
         if tag == ROI_LAST_PROCESSED_NAME:

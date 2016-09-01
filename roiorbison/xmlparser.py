@@ -60,10 +60,10 @@ class XMLParser:
         events = root_parser.read_events()
         while True:
             received = await self._input_queue.get()
-            if received is poisonpill.PoisonPill:
+            if received is poisonpill.POISON_PILL:
                 # No matter if we received some bytes as it was not enough to
                 # parse into an Element.
-                return poisonpill.PoisonPill, None
+                return poisonpill.POISON_PILL, None
             stream_start += received
             root_parser.feed(received)
             for dummy_action, element in events:
@@ -76,14 +76,14 @@ class XMLParser:
         """Parse bytes from input and put Elements to output and forward queues.
 
         This coroutine completes only in case of a parsing error or if the
-        PoisonPill is found from the input queue.
+        POISON_PILL is found from the input queue.
         """
         parser = etree.XMLPullParser(events=('end', ))
         events = parser.read_events()
         try:
             stream_start, root_start_tag_name = self._handle_root_start_tag()
-            if stream_start is poisonpill.PoisonPill:
-                LOG.debug('Received PoisonPill.')
+            if stream_start is poisonpill.POISON_PILL:
+                LOG.debug('Received POISON_PILL.')
                 return
             parser.feed(stream_start)
             while True:
@@ -94,8 +94,8 @@ class XMLParser:
                         self._copy_into_queues(element)
                         _trim_tree(element)
                 received = await self._input_queue.get()
-                if received is poisonpill.PoisonPill:
-                    LOG.debug('Received PoisonPill.')
+                if received is poisonpill.POISON_PILL:
+                    LOG.debug('Received POISON_PILL.')
                     return
                 parser.feed(received)
         except etree.LxmlError as ex:
