@@ -27,12 +27,13 @@ mqtt:
     port: 8883
     topic: 'roiorbison'
     qos: 2
+    client_id: 'MY_MQTT_CLIENT_ID'
     retained_message_wait_duration: 'PT10S'
 logging:
     version: 1
     formatters:
         utc:
-            (): 'utcformatter.UTCFormatter'
+            (): 'roiorbison.utcformatter.UTCFormatter'
             format: '%(asctime)s.%(msecs)03dZ %(name)s: %(levelname)s: %(message)s'
             datefmt: '%Y-%m-%dT%H:%M:%S'
     handlers:
@@ -42,4 +43,4 @@ logging:
     root:
         handlers:
             - 'console'
-        level: 'DEBUG'
+        level: 'WARNING'
