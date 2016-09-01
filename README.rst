@@ -40,12 +40,12 @@ Install
 
 .. code-block:: sh
 
-  git clone https://github.com/hsldevcom/roiorbison
-  cd roiorbison
-  pip install -r requirements/prod.txt
-  cp config.yaml.template config.yaml
-  # Change endpoints, credentials etc.
-  vim config.yaml
+    git clone https://github.com/hsldevcom/roiorbison
+    cd roiorbison
+    cp config.yaml.template config.yaml
+    # Change endpoints, credentials etc.
+    vim config.yaml
+    ./setup.py install
 
 
 Run
@@ -53,7 +53,7 @@ Run
 
 .. code-block:: sh
 
-  python3 roiorbison/roiorbison.py
+    roiorbison -c config.yaml
 
 
 Develop
@@ -63,18 +63,18 @@ Install development dependencies:
 
 .. code-block:: sh
 
-  pip-sync requirements/dev.txt
+    pip install -r requirements/dev.txt
 
 Upgrade dependencies:
 
 .. code-block:: sh
 
-  ./upgrade_dependencies.sh
-  pip-sync requirements/dev.txt
+    ./upgrade_dependencies.sh
+    pip-sync requirements/dev.txt
 
 
 License
 -------
 
-roiorbison is dual-licensed under AGPLv3 and EUPL v1.2.
-Take your pick.
+roiorbison is licensed under the AGPLv3 license.
+See the files LICENSE and LICENSE_AGPL for more information.
