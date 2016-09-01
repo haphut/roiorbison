@@ -126,18 +126,29 @@ class ROIManager:
 
     async def _clean_up(self):
         # Clean up in order from the reading end to the writing end.
-        self._reading_fut.cancel()
-        await self._async_helper.wait_forever(self._reading_fut)
+
+        if self._reading_fut is not None:
+            self._reading_fut.cancel()
+            await self._async_helper.wait_forever(self._reading_fut)
+            self._reading_fut = None
+
         await self._bytes_in_queue.put(poisonpill.POISON_PILL)
-        await self._async_helper.wait_forever(self._parsing_fut)
+        if self._parsing_fut is not None:
+            await self._async_helper.wait_forever(self._parsing_fut)
+            self._parsing_fut = None
+
         await self._async_helper.run_in_executor(
             functools.partial(self._xml_in_queue.put, poisonpill.POISON_PILL))
-        await self._async_helper.wait_forever(self._roi_machine_fut)
+        if self._roi_machine_fut is not None:
+            await self._async_helper.wait_forever(self._roi_machine_fut)
+            self._roi_machine_fut = None
+
         await self._async_helper.run_in_executor(
             functools.partial(self._bytes_out_queue.put,
                               poisonpill.POISON_PILL))
-        await self._bytes_out_queue.put(poisonpill.POISON_PILL)
-        await self._async_helper.wait_forever(self._writing_fut)
+        if self._writing_fut is not None:
+            await self._async_helper.wait_forever(self._writing_fut)
+            self._writing_fut = None
 
         # Empty the queues for reuse.
         await _empty_asyncio_queue(self._bytes_in_queue)
@@ -145,7 +156,9 @@ class ROIManager:
         await _empty_queue(self._bytes_out_queue)
 
         # In CPython 3.5.2 close can be called several times consecutively.
-        self._writer.close()
+        if self._writer is not None:
+            self._writer.close()
+            self._writer = None
 
     async def run(self):
         """Run ROIManager."""
@@ -157,8 +170,8 @@ class ROIManager:
                 await self._set_futures_up()
                 await self._wait_until_problem()
             except OSError as ex:
-                LOG.warning('ROI connection problem: ' + ex)
+                LOG.warning('ROI connection problem: ' + str(ex))
             await self._clean_up()
-            LOG.info('Wait ' + self._reconnect_wait_in_seconds +
+            LOG.info('Wait ' + str(self._reconnect_wait_in_seconds) +
                      ' seconds before reconnecting.')
             await asyncio.sleep(self._reconnect_wait_in_seconds)
