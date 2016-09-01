@@ -21,6 +21,8 @@ def main():
     logging.config.dictConfig(config['logging'])
     logger = logging.getLogger(__name__)
 
+    logger.info('roiorbison started')
+
     loop = asyncio.get_event_loop()
     async_helper = util.AsyncHelper(loop, executor=None)
 
