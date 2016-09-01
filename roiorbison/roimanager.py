@@ -133,8 +133,8 @@ class ROIManager:
             functools.partial(self._xml_in_queue.put, poisonpill.POISON_PILL))
         await self._async_helper.wait_forever(self._roi_machine_fut)
         await self._async_helper.run_in_executor(
-            functools.partial(self._bytes_out_queue.put, poisonpill.POISON_PILL)
-        )
+            functools.partial(self._bytes_out_queue.put,
+                              poisonpill.POISON_PILL))
         await self._bytes_out_queue.put(poisonpill.POISON_PILL)
         await self._async_helper.wait_forever(self._writing_fut)
 
