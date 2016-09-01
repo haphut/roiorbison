@@ -44,3 +44,4 @@ logging:
         handlers:
             - 'console'
         level: 'WARNING'
+    disable_existing_loggers: False
