@@ -44,5 +44,5 @@ def main():
         async_helper.wait_until_first_done(futures, logger))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
