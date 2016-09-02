@@ -2,7 +2,6 @@
 """Control all of ROI handling."""
 
 import asyncio
-import functools
 import logging
 import queue
 
@@ -125,6 +124,11 @@ class ROIManager:
         await self._async_helper.wait_until_first_done(futures, LOG)
 
     async def _clean_up(self):
+        if self._mqtt_disconnects_fut is not None:
+            self._mqtt_disconnects_fut.cancel()
+            await self._async_helper.wait_forever(self._mqtt_disconnects_fut)
+            self._mqtt_disconnects_fut = None
+
         # Clean up in order from the reading end to the writing end.
 
         if self._reading_fut is not None:
