@@ -68,7 +68,7 @@ class XMLParser:
             for dummy_action, element in events:
                 # First tag must belong to the root element.
                 root_start_tag_name = element.tag
-                self._copy_into_queues(element)
+                await self._copy_into_queues(element)
                 return stream_start, root_start_tag_name
 
     async def keep_parsing(self):
@@ -80,7 +80,8 @@ class XMLParser:
         parser = etree.XMLPullParser(events=('end', ))
         events = parser.read_events()
         try:
-            stream_start, root_start_tag_name = self._handle_root_start_tag()
+            stream_start, root_start_tag_name = (await
+                                                 self._handle_root_start_tag())
             if stream_start is poisonpill.POISON_PILL:
                 LOG.debug('Received POISON_PILL.')
                 return
@@ -90,7 +91,7 @@ class XMLParser:
                     parent = element.getparent()
                     # Only the root element and its children interest us.
                     if parent is None or parent.tag == root_start_tag_name:
-                        self._copy_into_queues(element)
+                        await self._copy_into_queues(element)
                         _trim_tree(element)
                 received = await self._input_queue.get()
                 if received is poisonpill.POISON_PILL:
