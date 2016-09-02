@@ -145,15 +145,14 @@ class ROIManager:
             await self._async_helper.wait_forever(self._parsing_fut)
             self._parsing_fut = None
 
-        await self._async_helper.run_in_executor(
-            functools.partial(self._xml_in_queue.put, poisonpill.POISON_PILL))
+        await self._async_helper.run_in_executor(self._xml_in_queue.put,
+                                                 poisonpill.POISON_PILL)
         if self._roi_machine_fut is not None:
             await self._async_helper.wait_forever(self._roi_machine_fut)
             self._roi_machine_fut = None
 
-        await self._async_helper.run_in_executor(
-            functools.partial(self._bytes_out_queue.put,
-                              poisonpill.POISON_PILL))
+        await self._async_helper.run_in_executor(self._bytes_out_queue.put,
+                                                 poisonpill.POISON_PILL)
         if self._writing_fut is not None:
             await self._async_helper.wait_forever(self._writing_fut)
             self._writing_fut = None
