@@ -20,7 +20,7 @@ async def _keep_reading(reader, bytes_in_queue):
     In case the remote end has closed the connection, return.
     """
     while True:
-        line = await reader.read_line()
+        line = await reader.readline()
         if line:
             await bytes_in_queue.put(line)
         else:
