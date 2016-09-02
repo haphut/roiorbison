@@ -72,7 +72,7 @@ class MQTTRetainedRetriever:
 
     def _cb_on_disconnect(self, client, userdata, rc):
         if rc == 0:
-            LOG.info('Disconnection succeeded.')
+            LOG.info('MQTT disconnection succeeded.')
             # We should make sure that the connection is disconnected before
             # reusing the client ID elsewhere. That is why the Event is set
             # this late.

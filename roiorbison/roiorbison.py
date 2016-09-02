@@ -21,9 +21,10 @@ def main():
     logging.config.dictConfig(config['logging'])
     logger = logging.getLogger(__name__)
 
-    logger.info('roiorbison started')
+    logger.info('roiorbison started.')
 
     loop = asyncio.get_event_loop()
+    loop.set_debug(True)
     async_helper = util.AsyncHelper(loop, executor=None)
 
     xml_forward_queue = asyncio.Queue()

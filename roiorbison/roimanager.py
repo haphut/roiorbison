@@ -96,7 +96,7 @@ class ROIManager:
         self._roi_machine_fut = None
 
     async def _connect(self):
-        LOG.info('Connecting to the ROI server')
+        LOG.info('Connecting to the ROI server.')
         self._reader, self._writer = await asyncio.open_connection(
             self._host,
             self._port,
