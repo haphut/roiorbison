@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Figure out ROI protocol state."""
 
-import functools
 import logging
 
 from automaton import machines
@@ -304,5 +303,4 @@ class ROIMachine:
     async def run(self):
         """Run the ROI state machine."""
         runner = runners.FiniteRunner(self._machine)
-        await self._async_helper.run_in_executor(
-            functools.partial(runner.run, 'start'))
+        await self._async_helper.run_in_executor(runner.run, 'start')
