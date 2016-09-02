@@ -144,7 +144,7 @@ class ROIMachine:
             LOG.debug('Received POISON_PILL.')
             return 'got_poison_pill'
         if received.tag == ROI_ROOT_NAME:
-            LOG.debug('Received: ' + received)
+            LOG.debug('Received: ' + str(received))
             return 'got_remote_root_start_tag'
         else:
             return 'got_unexpected_element'
@@ -177,14 +177,14 @@ class ROIMachine:
             return 'got_poison_pill'
         tag = received.tag
         if tag == ROI_SUBSCRIPTION_RESUME_RESPONSE_NAME:
-            LOG.info('Received: ' + received)
+            LOG.info('Received: ' + str(received))
             return 'got_resuming_ok'
         if tag == ROI_LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
-            LOG.debug('Received: ' + received)
+            LOG.debug('Received: ' + str(received))
             return 'got_last_processed_request'
         if tag == ROI_SUBSCRIPTION_ERROR_REPORT_NAME:
-            LOG.warning('Received: ' + received)
+            LOG.warning('Received: ' + str(received))
             # "The SynchronisedUpToUtcDateTime is no longer in the production
             # plan's active interval. The Production Plan will be recovered
             # from the earliest possible time instead."
@@ -194,10 +194,10 @@ class ROIMachine:
                 self._should_resume = False
                 return 'got_resuming_failed'
         if tag == ROI_SUBSCRIPTION_ERROR_RESPONSE_NAME:
-            LOG.warning('Received: ' + received)
+            LOG.warning('Received: ' + str(received))
             self._should_resume = False
             return 'got_resuming_failed'
-        LOG.warning('Received: ' + received)
+        LOG.warning('Received: ' + str(received))
         return 'got_unexpected_element'
 
     def _react_in_subscribing_response(self, dummy_old_state, dummy_new_state,
@@ -209,19 +209,19 @@ class ROIMachine:
         tag = received.tag
         if tag == ROI_SUBSCRIPTION_RESPONSE_NAME:
             self._should_resume = True
-            LOG.info('Received: ' + received)
+            LOG.info('Received: ' + str(received))
             return 'got_subscribing_ok'
         if tag == ROI_LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
-            LOG.debug('Received: ' + received)
+            LOG.debug('Received: ' + str(received))
             return 'got_last_processed_request'
         if (tag == ROI_SUBSCRIPTION_ERROR_REPORT_NAME or
                 tag == ROI_SUBSCRIPTION_ERROR_RESPONSE_NAME):
             self._should_resume = True
-            LOG.warning('Received: ' + received)
+            LOG.warning('Received: ' + str(received))
             return 'got_subscribing_failed'
         self._should_resume = True
-        LOG.warning('Received: ' + received)
+        LOG.warning('Received: ' + str(received))
         return 'got_unexpected_element'
 
     def _react_in_last_processed(self, old_state, dummy_new_state,
@@ -243,12 +243,12 @@ class ROIMachine:
         tag = received.tag
         if tag == ROI_LAST_PROCESSED_NAME:
             self._on_message_id = received.get('MessageId')
-            LOG.debug('Received: ' + received)
+            LOG.debug('Received: ' + str(received))
             return 'got_last_processed_request'
         if tag == ROI_ROOT_NAME:
-            LOG.warning('Received: ' + received)
+            LOG.warning('Received: ' + str(received))
             return 'got_remote_root_end_tag'
-        LOG.debug('Received: ' + received)
+        LOG.debug('Received: ' + str(received))
         return 'got_other_element'
 
     def _react_in_closing(self, dummy_old_state, dummy_new_state, dummy_event):
