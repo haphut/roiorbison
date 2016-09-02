@@ -3,7 +3,6 @@
 
 import logging
 import copy
-import functools
 
 from lxml import etree
 
@@ -43,8 +42,8 @@ class XMLParser:
         We wish to reduce the memory used by the ElementTree by trimming the
         tree so send independent copies of elements onwards.
         """
-        await self._async_helper.run_in_executor(
-            functools.partial(self._output_queue.put, copy.deepcopy(element)))
+        await self._async_helper.run_in_executor(self._output_queue.put,
+                                                 copy.deepcopy(element))
         await self._forward_queue.put(copy.deepcopy(element))
 
     async def _handle_root_start_tag(self):
