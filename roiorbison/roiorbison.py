@@ -42,9 +42,12 @@ def main():
                                         xml_forward_queue, is_mqtt_connected,
                                         is_mqtt_disconnected)
 
-    futures = [mqtt_forwarder.run(), roi_manager.run()]
-    loop.run_until_complete(
-        async_helper.wait_until_first_done(futures, logger))
+    tasks = [
+        mqtt_forwarder.run(),
+        roi_manager.run(),
+    ]
+    loop.run_until_complete(async_helper.wait_for_first(tasks))
+    loop.close()
 
 
 if __name__ == '__main__':

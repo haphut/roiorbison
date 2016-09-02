@@ -125,7 +125,7 @@ class ROIManager:
         ]
         # As long as everything works as expected, none of the futures
         # should get done.
-        await self._async_helper.wait_until_first_done(futures, LOG)
+        await self._async_helper.wait_for_first(futures)
 
     async def _clean_up(self):
         if self._mqtt_disconnects_fut is not None:
