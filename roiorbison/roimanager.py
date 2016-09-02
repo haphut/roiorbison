@@ -103,13 +103,17 @@ class ROIManager:
             limit=ROIManager._CONNECTION_READING_BUFFER)
 
     async def _set_futures_up(self):
-        self._mqtt_disconnects_fut = self._async_helper.wait_for_event(
-            self._is_mqtt_disconnected)
-        self._parsing_fut = self._xml_parser.keep_parsing()
-        self._reading_fut = _keep_reading(self._reader, self._bytes_in_queue)
-        self._writing_fut = _keep_writing(self._async_helper, self._writer,
-                                          self._bytes_out_queue)
-        self._roi_machine_fut = self._roi_machine.run()
+        self._mqtt_disconnects_fut = self._async_helper.ensure_future(
+            self._async_helper.wait_for_event(self._is_mqtt_disconnected))
+        self._parsing_fut = self._async_helper.ensure_future(
+            self._xml_parser.keep_parsing())
+        self._reading_fut = self._async_helper.ensure_future(
+            _keep_reading(self._reader, self._bytes_in_queue))
+        self._writing_fut = self._async_helper.ensure_future(
+            _keep_writing(self._async_helper, self._writer,
+                          self._bytes_out_queue))
+        self._roi_machine_fut = self._async_helper.ensure_future(
+            self._roi_machine.run())
 
     async def _wait_until_problem(self):
         futures = [
