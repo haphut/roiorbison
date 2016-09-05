@@ -23,7 +23,7 @@ async def _keep_reading(reader, bytes_in_queue):
         if line:
             await bytes_in_queue.put(line)
         else:
-            LOG.warning('ROI server has closed TCP connection.')
+            LOG.warning('ROI server has closed the TCP connection.')
             return
 
 
