@@ -38,13 +38,11 @@ setup(
         'PyYAML>=3.12,<4',
     ],
     data_files=[
-        ('',
-            [
-                'LICENSE',
-                'LICENSE_AGPL',
-                'config.yaml.template',
-            ]
-        ),
+        ('', [
+            'LICENSE',
+            'LICENSE_AGPL',
+            'config.yaml.template',
+        ]),
         ('templates', ['templates/*.template']),
     ],
     entry_points={
