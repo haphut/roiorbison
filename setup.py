@@ -15,7 +15,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='roiorbison',
     version='0.0.1',
-    description='Publish ROI messages on an MQTT broker',
+    description='Publish ROI messages on an MQTT broker.',
     long_description=long_description,
     url='https://github.com/hsldevcom/roiorbison',
     author='haphut',
