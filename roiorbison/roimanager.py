@@ -181,4 +181,4 @@ class ROIManager:
             await self._clean_up()
             LOG.info('Wait ' + str(self._reconnect_wait_in_seconds) +
                      ' seconds before reconnecting.')
-            await asyncio.sleep(self._reconnect_wait_in_seconds)
+            await self._async_helper.sleep(self._reconnect_wait_in_seconds)

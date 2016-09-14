@@ -44,3 +44,7 @@ class AsyncHelper:
     async def wait_for_event(self, event, *args):
         """Use threading.Event.wait() with asyncio."""
         return await self.run_in_executor(event.wait, *args)
+
+    async def sleep(self, *args, **kwargs):
+        """Sleep in the right loop."""
+        return await asyncio.sleep(*args, **kwargs, loop=self.loop)
