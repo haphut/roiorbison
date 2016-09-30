@@ -5,6 +5,7 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+from glob import glob
 
 here = path.abspath(path.dirname(__file__))
 
@@ -43,7 +44,7 @@ setup(
             'LICENSE_AGPL',
             'config.yaml.template',
         ]),
-        ('templates', ['templates/*.template']),
+        ('roiorbison/templates', glob('templates/*.xml.template')),
     ],
     entry_points={
         'console_scripts': [

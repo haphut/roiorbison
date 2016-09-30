@@ -3,10 +3,7 @@
 
 import string
 
-
-def _get_file_content(filename):
-    with open(filename, 'rt', encoding='utf-8') as handle:
-        return handle.read()
+from pkg_resources import resource_string
 
 
 class Templater:
@@ -18,7 +15,8 @@ class Templater:
 
     def __init__(self, config, message_id_generator):
         self._generator = message_id_generator
-        self._template = string.Template(_get_file_content(config['filename']))
+        self._template = string.Template(resource_string(
+            __name__, config['filename']).decode('utf-8'))
         self._mapping = config['mapping']
 
     def fill(self, extra_mapping=None):
