@@ -22,4 +22,3 @@ WORKDIR /
 COPY config.yaml .
 
 CMD ["roiorbison", "-c", "config.yaml"]
-
