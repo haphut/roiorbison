@@ -43,13 +43,13 @@ class MQTTRetainedRetriever:
             LOG.info('MQTT connection attempt succeeded.')
             self._client.subscribe(self._topic, self._qos)
         else:
-            LOG.warning('MQTT connection attempt failed: ' +
+            LOG.info('MQTT connection attempt failed: ' +
                         mqtt.connack_string(rc))
 
     def _cb_on_subscribe(self, client, userdata, mid, granted_qos):
         if len(granted_qos) != 1:
-            LOG.warning('Only one topic was subscribed to but granted_qos has '
-                        'value: ' + str(granted_qos))
+            LOG.error('Only one topic was subscribed to but granted_qos has '
+                      'value: ' + str(granted_qos))
         got_qos = granted_qos[0]
         if got_qos != self._qos:
             LOG.warning('Granted QoS for the subscription was ' + str(got_qos)
