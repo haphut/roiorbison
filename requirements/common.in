@@ -1,5 +1,5 @@
 automaton
 isodate
 lxml
-paho-mqtt
+-e git+https://github.com/eclipse/paho.mqtt.python.git@2539ea2d3ab1bf10e5e255f66dc61c09b996633b#egg=paho-mqtt
 PyYAML

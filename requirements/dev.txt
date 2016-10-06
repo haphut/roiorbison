@@ -16,7 +16,7 @@ isort==4.2.5              # via pylint
 lazy-object-proxy==1.2.2  # via astroid
 lxml==3.6.4
 mccabe==0.5.2             # via flake8, pylint
-paho-mqtt==1.2
+-e git+https://github.com/eclipse/paho.mqtt.python.git@2539ea2d3ab1bf10e5e255f66dc61c09b996633b#egg=paho-mqtt
 parse-type==0.3.4         # via behave
 parse==1.6.6              # via behave, parse-type
 pbr==1.10.0               # via automaton, debtcollector
