@@ -9,10 +9,19 @@ import paho.mqtt.client as mqtt
 from . import util
 
 LOG = logging.getLogger(__name__)
+PAHO_LOG = logging.getLogger("paho.mqtt.client")
 
 
 class MQTTRetainedRetriever:
     """Connect and try to retrieve a retained message from an MQTT topic."""
+
+    _LOG_MATCH = {
+        mqtt.MQTT_LOG_DEBUG: logging.DEBUG,
+        mqtt.MQTT_LOG_INFO: logging.INFO,
+        mqtt.MQTT_LOG_NOTICE: logging.INFO,
+        mqtt.MQTT_LOG_WARNING: logging.WARNING,
+        mqtt.MQTT_LOG_ERR: logging.ERROR,
+    }
 
     def __init__(self, config):
         self._retained_message = None
@@ -30,12 +39,22 @@ class MQTTRetainedRetriever:
 
     def _create_client(self, config):
         """Create an MQTT client with all the proper settings."""
-        client = mqtt.Client(client_id=config['client_id'])
+        client_id = config.get('client_id', None)
+        client = mqtt.Client(
+            client_id=client_id, transport=config['transport'])
         client.on_connect = self._cb_on_connect
         client.on_subscribe = self._cb_on_subscribe
         client.on_message = self._cb_on_message
         client.on_unsubscribe = self._cb_on_unsubscribe
         client.on_disconnect = self._cb_on_disconnect
+        client.on_log = self._cb_on_log
+        tls_path = config.get('ca_certs_path', None)
+        if tls_path is not None:
+            client.tls_set(tls_path)
+        username = config.get('username', None)
+        password = config.get('password', None)
+        if username is not None and password is not None:
+            client.username_pw_set(username, password=password)
         return client
 
     def _cb_on_connect(self, mqtt_client, userdata, flags, rc):
@@ -47,6 +66,7 @@ class MQTTRetainedRetriever:
                         mqtt.connack_string(rc))
 
     def _cb_on_subscribe(self, client, userdata, mid, granted_qos):
+        LOG.debug("_cb_on_subscribe")
         if len(granted_qos) != 1:
             LOG.error('Only one topic was subscribed to but granted_qos has '
                       'value: ' + str(granted_qos))
@@ -59,7 +79,9 @@ class MQTTRetainedRetriever:
         self._timer.start()
 
     def _cb_on_message(self, client, userdata, message):
+        LOG.debug("_cb_on_message")
         self._timer.cancel()
+        LOG.debug("timer cancelled")
         if message.topic == self._topic and message.retain:
             if message.qos != self._qos:
                 LOG.warning('Retained message QoS was ' + str(message.qos) +
@@ -68,6 +90,7 @@ class MQTTRetainedRetriever:
         self._client.unsubscribe([self._topic])
 
     def _cb_on_unsubscribe(self, client, userdata, mid):
+        LOG.debug("_cb_on_unsubscribe")
         self._client.disconnect()
 
     def _cb_on_disconnect(self, client, userdata, rc):
@@ -80,11 +103,16 @@ class MQTTRetainedRetriever:
         else:
             LOG.warning('Lost MQTT connection: ' + mqtt.error_string(rc))
 
+    def _cb_on_log(self, mqtt_client, userdata, level, buf):
+        log_level = MQTTRetainedRetriever._LOG_MATCH[level]
+        PAHO_LOG.log(log_level, buf)
+
     def run(self):
         """Connect, subscribe, wait for a message and return the message.
 
         This function blocks so it should be run in a separate thread.
         """
+        LOG.info("Connecting to host %s port %s", self._host, self._port)
         self._client.connect_async(self._host, port=self._port)
         self._client.loop_forever()
         self._is_retrieval_done.wait()

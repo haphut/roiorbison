@@ -10,6 +10,7 @@ from . import mqttretainedretriever as retriever
 from . import roimachine
 
 LOG = logging.getLogger(__name__)
+PAHO_LOG = logging.getLogger("paho.mqtt.client")
 
 
 def _serialize(element, is_root_tag=False):
@@ -40,6 +41,14 @@ class MQTTForwarder:
     Then we start publishing accordingly.
     """
 
+    _LOG_MATCH = {
+        mqtt.MQTT_LOG_DEBUG: logging.DEBUG,
+        mqtt.MQTT_LOG_INFO: logging.INFO,
+        mqtt.MQTT_LOG_NOTICE: logging.INFO,
+        mqtt.MQTT_LOG_WARNING: logging.WARNING,
+        mqtt.MQTT_LOG_ERR: logging.ERROR,
+    }
+
     def __init__(self, config, async_helper, xml_forward_queue,
                  is_mqtt_connected, is_mqtt_disconnected):
         self._async_helper = async_helper
@@ -58,9 +67,19 @@ class MQTTForwarder:
         self._client = self._create_client(config)
 
     def _create_client(self, config):
-        client = mqtt.Client(client_id=config['client_id'])
+        client_id = config.get('client_id', None)
+        client = mqtt.Client(
+            client_id=client_id, transport=config['transport'])
         client.on_connect = self._cb_on_connect
         client.on_disconnect = self._cb_on_disconnect
+        client.on_log = self._cb_on_log
+        tls_path = config.get('ca_certs_path', None)
+        if tls_path is not None:
+            client.tls_set(tls_path)
+        username = config.get('username', None)
+        password = config.get('password', None)
+        if username is not None and password is not None:
+            client.username_pw_set(username, password=password)
         return client
 
     def _signal_connect(self):
@@ -87,6 +106,10 @@ class MQTTForwarder:
         else:
             LOG.warning('Lost MQTT connection: ' + mqtt.error_string(rc))
         self._signal_disconnect()
+
+    def _cb_on_log(self, mqtt_client, userdata, level, buf):
+        log_level = MQTTForwarder._LOG_MATCH[level]
+        PAHO_LOG.log(log_level, buf)
 
     def _check_root_start_tag(self, message):
         if message is not None:
@@ -142,6 +165,7 @@ class MQTTForwarder:
     async def run(self):
         """Run the MQTTForwarder."""
         await self._check_retained_message()
+        LOG.info("Connecting to host %s port %s", self._host, self._port)
         self._client.connect_async(self._host, port=self._port)
         self._client.loop_start()
         await self._async_helper.wait_for_event(self._is_mqtt_connected)
