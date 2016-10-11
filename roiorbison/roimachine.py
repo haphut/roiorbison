@@ -44,13 +44,13 @@ class ROIMachine:
         {
             'name': 'remote_root_tag',
             'next_states': {
-                'got_remote_root_start_tag': 'subscription_branching',
+                'got_remote_root_start_tag': 'subscription_choice',
                 'got_unexpected_element': 'closing',
                 'got_poison_pill': 'closing',
             },
         },
         {
-            'name': 'subscription_branching',
+            'name': 'subscription_choice',
             'next_states': {
                 'chose_to_resume': 'resuming_attempt',
                 'chose_to_subscribe': 'subscribing_attempt',
@@ -273,7 +273,7 @@ class ROIMachine:
         m.add_reaction('remote_root_tag', 'sent_own_root_start_tag',
                        self._react_in_remote_root_tag)
         m.add_reaction('own_root_tag', 'start', self._react_in_own_root_tag)
-        m.add_reaction('subscription_branching', 'got_remote_root_start_tag',
+        m.add_reaction('subscription_choice', 'got_remote_root_start_tag',
                        self._react_in_subscription_choice)
         m.add_reaction('closing', 'got_unexpected_element',
                        self._react_in_closing)
