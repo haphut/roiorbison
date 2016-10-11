@@ -5,7 +5,6 @@
 import asyncio
 import logging
 import logging.config
-import threading
 
 from . import cmdline
 from . import mqttforwarder
@@ -30,8 +29,8 @@ def main():
 
     # Create separate events for getting connected and disconnected so both can
     # be waited for normally. Not very pretty.
-    is_mqtt_connected = threading.Event()
-    is_mqtt_disconnected = threading.Event()
+    is_mqtt_connected = asyncio.Event(loop=loop)
+    is_mqtt_disconnected = asyncio.Event(loop=loop)
     is_mqtt_disconnected.set()
 
     mqtt_forwarder = mqttforwarder.MQTTForwarder(

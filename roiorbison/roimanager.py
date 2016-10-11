@@ -104,7 +104,7 @@ class ROIManager:
 
     async def _set_futures_up(self):
         self._mqtt_disconnects_fut = self._async_helper.ensure_future(
-            self._async_helper.wait_for_event(self._is_mqtt_disconnected))
+            self._is_mqtt_disconnected.wait())
         self._parsing_fut = self._async_helper.ensure_future(
             self._xml_parser.keep_parsing())
         self._reading_fut = self._async_helper.ensure_future(
@@ -171,8 +171,7 @@ class ROIManager:
         """Run ROIManager."""
         while True:
             try:
-                await self._async_helper.wait_for_event(
-                    self._is_mqtt_connected)
+                await self._is_mqtt_connected.wait()
                 await self._connect()
                 await self._set_futures_up()
                 await self._wait_until_problem()

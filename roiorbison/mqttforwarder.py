@@ -84,13 +84,14 @@ class MQTTForwarder:
 
     def _signal_connect(self):
         # Order matters in roimanager.py.
-        self._is_mqtt_disconnected.clear()
-        self._is_mqtt_connected.set()
+        self._async_helper.call_soon_threadsafe(
+            self._is_mqtt_disconnected.clear)
+        self._async_helper.call_soon_threadsafe(self._is_mqtt_connected.set)
 
     def _signal_disconnect(self):
         # Order matters in roimanager.py.
-        self._is_mqtt_connected.clear()
-        self._is_mqtt_disconnected.set()
+        self._async_helper.call_soon_threadsafe(self._is_mqtt_connected.clear)
+        self._async_helper.call_soon_threadsafe(self._is_mqtt_disconnected.set)
 
     def _cb_on_connect(self, mqtt_client, userdata, flags, rc):
         if rc == 0:
@@ -168,9 +169,9 @@ class MQTTForwarder:
         LOG.info("Connecting to host %s port %s", self._host, self._port)
         self._client.connect_async(self._host, port=self._port)
         self._client.loop_start()
-        await self._async_helper.wait_for_event(self._is_mqtt_connected)
+        await self._is_mqtt_connected.wait()
         await self._publish_root()
         await self._keep_publishing()
         self._client.disconnect()
-        await self._async_helper.wait_for_event(self._is_mqtt_disconnected)
+        await self._is_mqtt_disconnected.wait()
         self._client.loop_stop()
