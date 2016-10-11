@@ -25,6 +25,7 @@ class MQTTRetainedRetriever:
 
     def __init__(self, config):
         self._retained_message = None
+        self._is_message_handled = False
         self._is_retrieval_done = threading.Event()
         self._timer = None
 
@@ -58,6 +59,7 @@ class MQTTRetainedRetriever:
         return client
 
     def _cb_on_connect(self, mqtt_client, userdata, flags, rc):
+        LOG.debug("_cb_on_connect")
         if rc == 0:
             LOG.info('MQTT connection attempt succeeded.')
             self._client.subscribe(self._topic, self._qos)
@@ -74,19 +76,21 @@ class MQTTRetainedRetriever:
         if got_qos != self._qos:
             LOG.warning('Granted QoS for the subscription was ' + str(got_qos)
                         + '. Expected QoS ' + str(self._qos) + '.')
-        self._timer = threading.Timer(self._wait_in_seconds,
-                                      self._client.unsubscribe, [self._topic])
-        self._timer.start()
+        if not self._is_message_handled:
+            self._timer = threading.Timer(self._wait_in_seconds,
+                                          self._client.unsubscribe, [self._topic])
+            self._timer.start()
 
     def _cb_on_message(self, client, userdata, message):
         LOG.debug("_cb_on_message")
-        self._timer.cancel()
-        LOG.debug("timer cancelled")
+        if self._timer is not None:
+            self._timer.cancel()
         if message.topic == self._topic and message.retain:
             if message.qos != self._qos:
                 LOG.warning('Retained message QoS was ' + str(message.qos) +
                             '. Expected QoS ' + str(self._qos) + '.')
             self._retained_message = message.payload
+        self._is_message_handled = True
         self._client.unsubscribe([self._topic])
 
     def _cb_on_unsubscribe(self, client, userdata, mid):
@@ -94,6 +98,7 @@ class MQTTRetainedRetriever:
         self._client.disconnect()
 
     def _cb_on_disconnect(self, client, userdata, rc):
+        LOG.debug("_cb_on_disconnect")
         if rc == 0:
             LOG.info('MQTT disconnection succeeded.')
             # We should make sure that the connection is disconnected before
