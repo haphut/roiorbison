@@ -64,8 +64,8 @@ class MQTTRetainedRetriever:
             LOG.info('MQTT connection attempt succeeded.')
             self._client.subscribe(self._topic, self._qos)
         else:
-            LOG.info('MQTT connection attempt failed: ' +
-                        mqtt.connack_string(rc))
+            LOG.info('MQTT connection attempt failed: ' + mqtt.connack_string(
+                rc))
 
     def _cb_on_subscribe(self, client, userdata, mid, granted_qos):
         LOG.debug("_cb_on_subscribe")
@@ -77,8 +77,8 @@ class MQTTRetainedRetriever:
             LOG.warning('Granted QoS for the subscription was ' + str(got_qos)
                         + '. Expected QoS ' + str(self._qos) + '.')
         if not self._is_message_handled:
-            self._timer = threading.Timer(self._wait_in_seconds,
-                                          self._client.unsubscribe, [self._topic])
+            self._timer = threading.Timer(
+                self._wait_in_seconds, self._client.unsubscribe, [self._topic])
             self._timer.start()
 
     def _cb_on_message(self, client, userdata, message):
