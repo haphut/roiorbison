@@ -163,7 +163,7 @@ class ROIMachine:
     def _react_in_subscribing_attempt(self, dummy_old_state, dummy_new_state,
                                       dummy_event):
         self._messenger.send_subscribe()
-        return 'sent_resuming_element'
+        return 'sent_subscribing_element'
 
     # FIXME: Unknown when SubscriptionErrorReport or SubscriptionErrorResponse
     #        might lead to a successful resuming. We might cut off successful
