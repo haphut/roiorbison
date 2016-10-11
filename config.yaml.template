@@ -1,5 +1,5 @@
 roi:
-    host: 'roiserver.com'
+    host: 'MY_ROI_SERVER.com'
     port: 12345
     reconnect_interval: 'PT10S'
     templates:
@@ -23,11 +23,19 @@ roi:
             filename: 'templates/last_processed.xml.template'
             mapping: {}
 mqtt:
-    host: 'mqttbroker.com'
+    host: 'MY_MQTT_BROKER.com'
     port: 8883
-    topic: 'roiorbison'
+    transport: 'tcp'
+    # If commented out, do not try to use TLS.
+    ca_certs_path: '/etc/ssl/certs/ca-certificates.crt'
+    # If commented out, do not try to authenticate with username and password.
+    username: 'MY_MQTT_USERNAME'
+    # If commented out, do not try to authenticate with username and password.
+    password: 'MY_MQTT_PASSWORD'
+    topic: 'publish/everything/here'
     qos: 2
-    client_id: 'MY_MQTT_CLIENT_ID'
+    # If commented out, generate client ID randomly.
+    #client_id: 'MY_MQTT_CLIENT_ID'
     retained_message_wait_duration: 'PT10S'
 logging:
     version: 1
