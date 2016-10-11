@@ -296,6 +296,7 @@ class ROIMachine:
                        self._react_in_resuming_attempt)
         m.add_reaction('subscribing_attempt', 'chose_to_subscribe',
                        self._react_in_subscribing_attempt)
+        m.add_reaction('closing', 'got_poison_pill', self._react_in_closing)
         m.freeze()
         LOG.debug('ROI state machine:\n' + m.pformat())
         return m
