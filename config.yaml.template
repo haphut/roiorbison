@@ -7,7 +7,7 @@ roi:
             filename: 'templates/own_root_start_tag.xml.template'
             mapping:
                 peer_id: 'MY_ROI_PEER_ID'
-                max_message_interval: 'PT30S'
+                max_message_interval: 'PT60S'
                 document_layout_version: '3.0.7'
         own_root_end_tag:
             filename: 'templates/own_root_end_tag.xml.template'
