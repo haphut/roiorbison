@@ -8,7 +8,7 @@ roiorbison listens to a NOPTIS ROI XML feed and publishes nearly all received me
 Description
 -----------
 
-The `ROI feed <http://transmodel-cen.eu/?page_id=351>`_ contains real-time public transit data, e.g. vehicle locations and arrival time predictions.
+The `ROI feed <http://transmodel-cen.eu/?page_id=351>`_ contains real-time public transit data, e.g. arrival time predictions.
 
 The ROI protocol consists of a conceptually potentially infinite XML conversation over a TCP connection.
 The client starts the dialogue by sending the start tag of the client root element.
